@@ -1,0 +1,80 @@
+MANUAL INTERNO DE PROCEDIMENTOS
+Empresa Exemplo S.A.
+
+Versão: 1.0
+Data de atualização: 23/04/2026
+
+1. EXPEDIENTE
+
+1.1 O horário de trabalho padrão é das 8h às 18h, de segunda a sexta-feira.
+1.2 Existe tolerância de 15 minutos para entrada e saída.
+1.3 A jornada diária inclui 1 hora de intervalo para almoço.
+1.4 Em caso de atraso superior a 30 minutos, o colaborador deve justificar a ocorrência ao gestor imediato.
+
+2. FÉRIAS
+
+2.1 O pedido de férias deve ser feito com no mínimo 30 dias de antecedência.
+2.2 O colaborador deve preencher o formulário F-001 e enviar ao setor de Recursos Humanos.
+2.3 Férias só podem ser iniciadas após aprovação do gestor e do RH.
+2.4 O fracionamento de férias depende de autorização da empresa e deve respeitar a legislação vigente.
+2.5 Alterações no período de férias devem ser solicitadas por escrito.
+
+3. ATESTADO MÉDICO
+
+3.1 Atestados médicos de até 3 dias devem ser enviados ao RH em até 48 horas após o retorno ao trabalho.
+3.2 Atestados superiores a 3 dias devem ser enviados ao RH no mesmo dia da emissão, sempre que possível.
+3.3 O documento deve conter nome do colaborador, data de emissão, período de afastamento e identificação do profissional de saúde.
+3.4 Caso o atestado esteja ilegível ou incompleto, o RH poderá solicitar nova versão.
+
+4. HOME OFFICE
+
+4.1 O trabalho remoto pode ser autorizado conforme a função e a necessidade da empresa.
+4.2 O colaborador em home office deve manter disponibilidade durante o horário comercial.
+4.3 Reuniões agendadas durante o home office têm presença obrigatória, salvo impedimento justificado.
+4.4 Problemas de internet ou energia devem ser comunicados ao gestor assim que identificados.
+4.5 O colaborador é responsável por manter sigilo sobre informações corporativas ao trabalhar fora da empresa.
+
+5. REEMBOLSO DE DESPESAS
+
+5.1 Despesas relacionadas ao trabalho podem ser reembolsadas mediante envio de comprovante fiscal válido.
+5.2 O pedido de reembolso deve ser feito em até 10 dias úteis após a realização da despesa.
+5.3 Gastos com transporte, alimentação e hospedagem podem ser analisados para reembolso, desde que previamente autorizados.
+5.4 Reembolsos sem comprovante serão recusados.
+5.5 O setor financeiro analisa os pedidos em até 5 dias úteis após o recebimento completo da documentação.
+
+6. ACESSO A SISTEMAS
+
+6.1 Cada colaborador recebe um usuário individual e intransferível.
+6.2 As senhas devem ser trocadas a cada 90 dias.
+6.3 É proibido compartilhar credenciais com outros colaboradores.
+6.4 O acesso a sistemas internos pode ser suspenso em caso de suspeita de uso indevido.
+6.5 O uso de VPN é obrigatório para acesso remoto aos sistemas corporativos.
+
+7. CONDUTA E SEGURANÇA DA INFORMAÇÃO
+
+7.1 É proibido instalar softwares não autorizados nos computadores da empresa.
+7.2 Informações confidenciais não devem ser enviadas por canais pessoais de comunicação.
+7.3 Documentos internos não devem ser impressos sem necessidade.
+7.4 Ao se ausentar da estação de trabalho, o colaborador deve bloquear a tela.
+7.5 Qualquer incidente de segurança deve ser comunicado imediatamente ao setor responsável.
+
+8. LICENÇAS E AUSÊNCIAS
+
+8.1 Ausências por motivo de saúde devem ser comunicadas ao gestor no mesmo dia.
+8.2 Licença para acompanhamento médico de dependente deve ser solicitada com comprovação.
+8.3 A empresa pode exigir documentação complementar para justificar ausências.
+8.4 Faltas sem justificativa podem impactar avaliação de desempenho.
+
+9. SUPORTE INTERNO
+
+9.1 Solicitações de suporte técnico devem ser abertas pelo portal interno.
+9.2 O prazo médio para resposta do suporte é de 2 dias úteis.
+9.3 Problemas críticos devem ser sinalizados como prioridade alta.
+9.4 Em caso de falha de acesso, o colaborador deve informar o número do chamado ao gestor.
+
+10. DISPOSIÇÕES FINAIS
+
+10.1 Este manual deve ser consultado sempre que houver dúvida sobre procedimentos internos.
+10.2 Em caso de conflito entre este manual e uma política específica da área, prevalece a política específica.
+10.3 Situações não previstas neste documento devem ser encaminhadas ao gestor direto e ao RH.
+10.4 Este documento pode ser atualizado a qualquer momento pela empresa.

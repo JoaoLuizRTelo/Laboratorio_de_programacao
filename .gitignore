@@ -1,0 +1,11 @@
+# Variáveis de ambiente
+.env
+*.env
+
+# Dependências Python
+venv/
+__pycache__/
+*.pyc
+
+# Banco de dados local do ChromaDB
+RAG/chroma_db/
