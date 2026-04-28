@@ -1,56 +1,96 @@
-import streamlit as st
+from pathlib import Path
+from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
+
 from rag_core import RAGBasico
 
-st.set_page_config(page_title="RAG de Políticas Internas", layout="wide")
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_FILE = BASE_DIR / "rag-workspace.html"
+ASSETS_DIR = BASE_DIR / "assets"
+DEFAULT_DOC = BASE_DIR / "politicas_internas.txt"
 
-st.title("Sistema RAG - Políticas Internas")
-st.write("Faça perguntas sobre o documento da empresa e receba respostas fundamentadas com fontes.")
+app = Flask(__name__, static_folder="assets")
+CORS(app)
 
-rag = RAGBasico()
+rag = RAGBasico(
+    nome_colecao="manual_empresa",
+    pasta_db=str(BASE_DIR / "chroma_db")
+)
 
-with st.sidebar:
-    st.header("Configuração")
 
-    arquivo_txt = st.text_input("Caminho do arquivo .txt", value="politicas_internas.txt")
+def _json_error(message: str, status_code: int = 400):
+    return jsonify({"status": "erro", "mensagem": message}), status_code
 
-    estrategia = st.selectbox(
-        "Estratégia de chunking",
-        ["paragrafos", "sentencas", "fixo", "itens"]
+
+@app.get("/")
+def home():
+    return send_from_directory(BASE_DIR, FRONTEND_FILE.name)
+
+
+@app.get("/assets/<path:filename>")
+def assets(filename: str):
+    return send_from_directory(ASSETS_DIR, filename)
+
+
+@app.get("/api/health")
+def health():
+    return jsonify(
+        {
+            "status": "ok",
+            "mensagem": "API ativa",
+            "colecao": rag.nome_colecao,
+            "total_chunks": rag.total_chunks(),
+        }
     )
 
-    k = st.slider("Quantidade de chunks recuperados", min_value=1, max_value=5, value=3)
 
-    if st.button("Indexar documento"):
-        try:
-            resultado = rag.indexar_documento(arquivo_txt, estrategia=estrategia)
+@app.post("/api/indexar")
+def indexar():
+    data = request.get_json(silent=True) or {}
+    arquivo = data.get("arquivo") or DEFAULT_DOC.name
+    estrategia = data.get("estrategia", "itens")
 
-            if resultado["status"] == "ok":
-                st.success(f"{resultado['mensagem']} Total de chunks: {resultado['total_chunks']}")
-            else:
-                st.info(f"{resultado['mensagem']} Total atual: {resultado['total_chunks']}")
-        except Exception as e:
-            st.error(f"Erro ao indexar documento: {e}")
+    caminho_arquivo = Path(arquivo)
+    if not caminho_arquivo.is_absolute():
+        caminho_arquivo = BASE_DIR / arquivo
 
-st.subheader("Pergunta")
-pergunta = st.text_input("Digite sua pergunta")
+    if not caminho_arquivo.exists():
+        return _json_error(f"Arquivo não encontrado: {caminho_arquivo.name}", 404)
 
-if st.button("Consultar"):
-    if not pergunta.strip():
-        st.warning("Digite uma pergunta antes de consultar.")
-    else:
-        try:
-            resultado = rag.consultar(pergunta, k=k)
+    try:
+        resultado = rag.indexar_documento(str(caminho_arquivo), estrategia=estrategia)
+        return jsonify(resultado)
+    except Exception as e:
+        return _json_error(f"Erro ao indexar documento: {e}", 500)
 
-            st.subheader("Resposta")
-            st.write(resultado["resposta"])
 
-            st.subheader("Fontes recuperadas")
-            for i, fonte in enumerate(resultado["fontes"], start=1):
-                meta = fonte.get("metadados", {})
-                with st.expander(f"Fonte {i}"):
-                    st.write(f"**Arquivo:** {meta.get('fonte', 'N/A')}")
-                    st.write(f"**Chunk:** {meta.get('chunk_index', 'N/A')}")
-                    st.write(f"**Estratégia:** {meta.get('estrategia', 'N/A')}")
-                    st.write(fonte["texto"])
-        except Exception as e:
-            st.error(f"Erro na consulta: {e}")
+@app.post("/api/consultar")
+def consultar():
+    data = request.get_json(silent=True) or {}
+    pergunta = (data.get("pergunta") or "").strip()
+    k = int(data.get("k", 3))
+
+    if not pergunta:
+        return _json_error("Envie uma pergunta para consulta.", 400)
+
+    if rag.total_chunks() == 0:
+        return _json_error("Nenhum documento indexado. Indexe um documento primeiro.", 400)
+
+    try:
+        resultado = rag.consultar(pergunta, k=k)
+        return jsonify({"status": "ok", **resultado})
+    except Exception as e:
+        return _json_error(f"Erro na consulta: {e}", 500)
+
+
+@app.post("/api/limpar")
+def limpar():
+    try:
+        resultado = rag.limpar_base()
+        return jsonify(resultado)
+    except Exception as e:
+        return _json_error(f"Erro ao limpar base: {e}", 500)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

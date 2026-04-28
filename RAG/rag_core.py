@@ -1,12 +1,11 @@
 import os
 import re
-from typing import List, Dict
+from typing import Dict, List
 
 import chromadb
 from chromadb.utils import embedding_functions
 from dotenv import load_dotenv
 from openai import OpenAI
-
 
 load_dotenv()
 
@@ -16,42 +15,32 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 class Chunker:
-  
     @staticmethod
     def por_itens_numerados(texto: str) -> List[str]:
-        padrao = r'(?=^\d+(\.\d+)*\s+)'
+        padrao = r"(?=^\d+(\.\d+)*\s+)"
         partes = re.split(padrao, texto, flags=re.MULTILINE)
-        chunks = [p.strip() for p in partes if p and p.strip()]
-        return chunks
-      
+        return [p.strip() for p in partes if p and p.strip()]
+
     @staticmethod
-    def por_tamanho_fixo(
-        texto: str, tamanho: int = 800, overlap: int = 100
-    ) -> List[str]:
+    def por_tamanho_fixo(texto: str, tamanho: int = 800, overlap: int = 100) -> List[str]:
         chunks = []
         inicio = 0
-
         while inicio < len(texto):
             fim = inicio + tamanho
             chunk = texto[inicio:fim].strip()
-
             if chunk:
                 chunks.append(chunk)
-
             inicio = fim - overlap
-
         return chunks
 
     @staticmethod
     def por_sentencas(texto: str, sentencas_por_chunk: int = 4) -> List[str]:
         sentencas = re.split(r"(?<=[.!?])\s+", texto)
         chunks = []
-
         for i in range(0, len(sentencas), sentencas_por_chunk):
             chunk = " ".join(sentencas[i : i + sentencas_por_chunk]).strip()
             if chunk:
                 chunks.append(chunk)
-
         return chunks
 
     @staticmethod
@@ -61,20 +50,22 @@ class Chunker:
 
 
 class RAGBasico:
-    def __init__(
-        self, nome_colecao: str = "manual_empresa", pasta_db: str = "./chroma_db"
-    ):
+    def __init__(self, nome_colecao: str = "manual_empresa", pasta_db: str = "./chroma_db"):
+        self.nome_colecao = nome_colecao
+        self.pasta_db = pasta_db
         self.client = OpenAI()
-
         self.chroma = chromadb.PersistentClient(path=pasta_db)
-
         self.embedding_fn = embedding_functions.OpenAIEmbeddingFunction(
-            model_name=EMBEDDING_MODEL, api_key=OPENAI_API_KEY
+            model_name=EMBEDDING_MODEL,
+            api_key=OPENAI_API_KEY,
+        )
+        self.colecao = self.chroma.get_or_create_collection(
+            name=nome_colecao,
+            embedding_function=self.embedding_fn,
         )
 
-        self.colecao = self.chroma.get_or_create_collection(
-            name=nome_colecao, embedding_function=self.embedding_fn
-        )
+    def total_chunks(self) -> int:
+        return self.colecao.count()
 
     def carregar_txt(self, caminho_arquivo: str) -> str:
         with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
@@ -82,17 +73,14 @@ class RAGBasico:
 
     def gerar_chunks(self, texto: str, estrategia: str = "paragrafos") -> List[str]:
         if estrategia == "fixo":
-          return Chunker.por_tamanho_fixo(texto)
-        elif estrategia == "sentencas":
-          return Chunker.por_sentencas(texto)
-        elif estrategia == "itens":
-          return Chunker.por_itens_numerados(texto)
-        else:
-          return Chunker.por_paragrafos(texto)
+            return Chunker.por_tamanho_fixo(texto)
+        if estrategia == "sentencas":
+            return Chunker.por_sentencas(texto)
+        if estrategia == "itens":
+            return Chunker.por_itens_numerados(texto)
+        return Chunker.por_paragrafos(texto)
 
-    def indexar_documento(
-        self, caminho_arquivo: str, estrategia: str = "paragrafos"
-    ) -> Dict:
+    def indexar_documento(self, caminho_arquivo: str, estrategia: str = "paragrafos") -> Dict:
         texto = self.carregar_txt(caminho_arquivo)
         chunks = self.gerar_chunks(texto, estrategia)
 
@@ -105,7 +93,11 @@ class RAGBasico:
 
         ids = [f"chunk_{i}" for i in range(len(chunks))]
         metadados = [
-            {"fonte": caminho_arquivo, "chunk_index": i, "estrategia": estrategia}
+            {
+                "fonte": os.path.basename(caminho_arquivo),
+                "chunk_index": i,
+                "estrategia": estrategia,
+            }
             for i in range(len(chunks))
         ]
 
@@ -115,18 +107,33 @@ class RAGBasico:
             "status": "ok",
             "mensagem": "Documento indexado com sucesso.",
             "total_chunks": len(chunks),
+            "arquivo": os.path.basename(caminho_arquivo),
+            "estrategia": estrategia,
+        }
+
+    def limpar_base(self) -> Dict:
+        self.chroma.delete_collection(self.nome_colecao)
+        self.colecao = self.chroma.get_or_create_collection(
+            name=self.nome_colecao,
+            embedding_function=self.embedding_fn,
+        )
+        return {
+            "status": "ok",
+            "mensagem": "Base vetorial limpa com sucesso.",
+            "total_chunks": 0,
         }
 
     def recuperar_contexto(self, pergunta: str, k: int = 3) -> List[Dict]:
         resultados = self.colecao.query(query_texts=[pergunta], n_results=k)
-
         documentos = resultados.get("documents", [[]])[0]
         metadados = resultados.get("metadatas", [[]])[0]
+        distancias = resultados.get("distances", [[]])[0] if resultados.get("distances") else []
 
         contextos = []
-        for doc, meta in zip(documentos, metadados):
-            contextos.append({"texto": doc, "metadados": meta})
-
+        for i, (doc, meta) in enumerate(zip(documentos, metadados)):
+            distancia = distancias[i] if i < len(distancias) else None
+            score = None if distancia is None else round(1 / (1 + float(distancia)), 4)
+            contextos.append({"texto": doc, "metadados": meta, "score": score})
         return contextos
 
     def gerar_resposta(self, pergunta: str, contextos: List[Dict]) -> str:
@@ -163,10 +170,10 @@ RESPOSTA:
 
     def consultar(self, pergunta: str, k: int = 3) -> Dict:
         contextos = self.recuperar_contexto(pergunta, k=k)
-        print("\n===== CONTEXTOS RECUPERADOS =====")
-        for i, c in enumerate(contextos, start=1):
-            print(f"\n--- Fonte {i} ---")
-            print(c["texto"][:500])
         resposta = self.gerar_resposta(pergunta, contextos)
-
-        return {"pergunta": pergunta, "resposta": resposta, "fontes": contextos}
+        return {
+            "pergunta": pergunta,
+            "resposta": resposta,
+            "fontes": contextos,
+            "total_fontes": len(contextos),
+        }

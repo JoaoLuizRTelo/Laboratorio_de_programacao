@@ -2,3 +2,5 @@ openai
 chromadb
 python-dotenv
 streamlit
+flask 
+flask-cors
