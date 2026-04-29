@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rag-workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+
+  <div class="app-shell">
+    <aside class="sidebar panel">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" role="img" aria-label="Logo do sistema RAG">
+            <path d="M14 18h20l16 14v14H30L14 32z" fill="none" stroke="currentColor" stroke-width="4"
+              stroke-linejoin="round" />
+            <path d="M24 26h14" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+            <path d="M24 34h18" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <p class="eyebrow">RAG Workspace</p>
+          <h1 class="brand-title">Consulta documental</h1>
+        </div>
+      </div>
+
+      <section class="control-card">
+        <div class="section-heading-row">
+          <h2>Ingestão</h2>
+          <span class="status-badge" id="ingest-status">Pronto</span>
+        </div>
+
+        <label for="document-name">Documento</label>
+        <input id="document-name" type="text" value="politicas_internas.txt" />
+
+        <label for="chunking">Estratégia de chunking</label>
+        <select id="chunking">
+          <option selected>itens</option>
+          <option>paragrafos</option>
+          <option>sentencas</option>
+          <option>fixo</option>
+        </select>
+
+        <label for="top-k">Chunks recuperados</label>
+        <input id="top-k" type="number" value="3" min="1" max="10" />
+
+        <div class="button-stack">
+          <button class="btn btn-primary" id="index-button" type="button">Indexar documento</button>
+          <button class="btn btn-secondary" id="clear-button" type="button">Limpar base</button>
+        </div>
+      </section>
+
+      <section class="control-card stats-card">
+        <div class="section-heading-row">
+          <h2>Estado da base</h2>
+          <span class="status-dot"></span>
+        </div>
+        <dl class="stats-grid">
+          <div>
+            <dt>Chunks</dt>
+            <dd id="stat-chunks">0</dd>
+          </div>
+          <div>
+            <dt>Documento</dt>
+            <dd id="stat-document">0 ativo</dd>
+          </div>
+          <div>
+            <dt>Modelo</dt>
+            <dd id="stat-model">gpt-4o-mini</dd>
+          </div>
+          <div>
+            <dt>Embedding</dt>
+            <dd id="stat-embedding">text-embedding-3-small</dd>
+          </div>
+        </dl>
+      </section>
+    </aside>
+
+    <main class="main-area" id="main-content">
+      <header class="topbar panel">
+        <div>
+          <p class="eyebrow">Sessão ativa</p>
+          <h2 class="page-title">Workspace de perguntas e respostas</h2>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn-theme" type="button" aria-label="Alternar tema" data-theme-toggle>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+          <button class="btn btn-secondary" id="reindex-button" type="button">Reindexar</button>
+        </div>
+      </header>
+
+      <section class="chat-panel panel">
+        <div class="chat-scroll" id="chat-scroll">
+          <article class="message assistant-message">
+            <div class="assistant-head">
+              <div class="assistant-chip">R</div>
+              <div>
+                <p class="message-label">RAG Engine</p>
+                <p class="message-meta" id="session-meta">Base aguardando indexação</p>
+              </div>
+            </div>
+            <div class="bubble assistant-bubble">
+              <p>Indexe o documento à esquerda e depois faça uma pergunta sobre o conteúdo carregado.</p>
+            </div>
+          </article>
+        </div>
+
+        <footer class="composer-wrap">
+          <label class="sr-only" for="question">Pergunta</label>
+          <div class="composer">
+            <textarea id="question" rows="1" placeholder="Pergunte algo sobre os documentos carregados..."></textarea>
+            <button class="btn btn-primary" id="send-button" type="button">Enviar</button>
+          </div>
+          <div class="composer-meta">
+            <span><span class="status-dot"></span> Base conectada</span>
+            <span>Enter para enviar</span>
+          </div>
+        </footer>
+      </section>
+    </main>
+
+    <aside class="context-panel panel" id="context-panel">
+      <div class="section-heading-row sticky-row">
+        <div>
+          <p class="eyebrow">Contexto recuperado</p>
+          <h2>Fontes da consulta</h2>
+        </div>
+        <div class="context-actions">
+          <span class="status-badge" id="context-top-k">Top 0</span>
+          <button class="icon-btn" id="context-toggle" type="button" aria-label="Recolher painel de contexto"
+            aria-expanded="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="context-list">
+        <p class="empty-copy">Nenhuma fonte recuperada ainda.</p>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const toggle = document.querySelector('[data-theme-toggle]');
+      let theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.setAttribute('data-theme', theme);
+
+      const renderIcon = () => {
+        if (!toggle) return;
+        toggle.innerHTML = theme === 'dark'
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+      };
+
+      renderIcon();
+      toggle?.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', theme);
+        renderIcon();
+      });
+    })();
+  </script>
+  <script src="./assets/app.js" defer></script>
+</body>
+
+</html>
