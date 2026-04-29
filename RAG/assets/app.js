@@ -170,7 +170,7 @@ async function consultar() {
   els.question.value = '';
   ajustarAlturaPergunta();
   els.sendButton.disabled = true;
-  setStatus('Consultando...', 'warning');
+  setStatus('...', 'warning');
 
   const loadingEl = document.createElement('article');
   loadingEl.className = 'message assistant-message message--loading';
@@ -205,7 +205,7 @@ async function consultar() {
     appendAssistantMessage(data.resposta, els.chunking.value);
     renderContexts(data.fontes || []);
     els.contextTopK.textContent = `Top ${data.total_fontes || 0}`;
-    setStatus('Resposta gerada', 'success');
+    setStatus('Gerado!', 'success');
   } catch (error) {
     document.getElementById('loading-indicator')?.remove();
     appendAssistantMessage(error.message, els.chunking.value);
