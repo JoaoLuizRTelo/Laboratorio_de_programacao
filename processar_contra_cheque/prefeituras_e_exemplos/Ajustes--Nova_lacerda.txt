@@ -1,0 +1,3 @@
+CONTRACHEQUE MODELO DE LAYOUT V2 (SQL), É NECESSÁRIO UTILIZAR A MACRO NO EXCEL E FAZER AS SEGUINTES ALTERAÇÕES:
+•Ajustar as datas (data nascimento) e (data admissão) que vem sem a barra, para ajustar: [copiar as datas no “arquivo base” colocar a barra e colar na linha F]
+•Retirar as letras D & H na linha “P” e “D” coluna (referência) e Colocar “0.00”. Verificar sempre se há espaços, letras, virgulas e demais alfas numéricos, esses campos coluna “H“ e “I“ devem conter somente pontos e números. (EX: 130.00, 0.00, 1.00, 1450.00 ...)

@@ -1,0 +1,3 @@
+Quando passa na Macro zera os dependentes, arrumar os dependentes do arquivo base da macro(coluna x) e copiar para a LINHA F, Coluna W (dependentes). Também colocar 0.00 na coluna J na linha T. Verificar se na linha P e D coluna “referencia” está com o .00, caso não esteja será necessário colocar. Verificar também se está com espaços na linha F coluna Q “Nome do vinculo” caso esteja com espaços é necessário tirar.
+
+Verificar secretaria, vem 70374 alterar para 70474.

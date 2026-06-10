@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contra Cheque — Gerador de Arquivo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ============================================================
+   RESET & VARIÁVEIS
+   ============================================================ */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #060e1e;
+      --surface: #0c1830;
+      --surface2: #112044;
+      --surface3: #182d5c;
+      --border: #1e3470;
+      --border2: #2a4a96;
+      --accent: #00c8f0;
+      --accent-d: #009bbf;
+      --accent-bg: rgba(0, 200, 240, 0.08);
+      --accent-bg2: rgba(0, 200, 240, 0.15);
+      --text: #e8f4ff;
+      --text2: #7aaec8;
+      --text3: #3a6080;
+      --danger: #ff5c5c;
+      --danger-bg: rgba(255, 92, 92, 0.08);
+      --warn: #ffb84d;
+      --warn-bg: rgba(255, 184, 77, 0.08);
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+      --radius: 6px;
+      --radius-lg: 10px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+   LAYOUT
+   ============================================================ */
+    .app {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    /* ============================================================
+   CABEÇALHO
+   ============================================================ */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--accent-bg2);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .header-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--accent);
+    }
+
+    .header-text h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .header-text p {
+      font-size: 0.875rem;
+      color: var(--text2);
+    }
+
+    .version-badge {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      padding: 3px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+      align-self: center;
+    }
+
+    /* ============================================================
+   SEÇÕES
+   ============================================================ */
+    .section {
+      margin-bottom: 1.5rem;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ============================================================
+   TABS
+   ============================================================ */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 1rem;
+      width: fit-content;
+    }
+
+    .tab-btn {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text2);
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      background: var(--accent-bg2);
+    }
+
+    /* ============================================================
+   DROP ZONE
+   ============================================================ */
+    .drop-zone {
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+
+    .drop-zone-icon {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 0.75rem;
+      color: var(--text3);
+    }
+
+    .drop-zone-icon svg {
+      width: 100%;
+      height: 100%;
+      stroke: currentColor;
+    }
+
+    .drop-zone:hover .drop-zone-icon,
+    .drop-zone.drag-over .drop-zone-icon {
+      color: var(--accent);
+    }
+
+    .drop-zone p {
+      font-size: 0.875rem;
+      color: var(--text2);
+    }
+
+    .drop-zone p strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .drop-zone p small {
+      font-size: 0.75rem;
+      color: var(--text3);
+      display: block;
+      margin-top: 4px;
+    }
+
+    .drop-zone.has-file {
+      border-style: solid;
+      border-color: var(--accent);
+      background: var(--accent-bg);
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    .file-info svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    /* ============================================================
+   TEXTAREA
+   ============================================================ */
+    textarea {
+      width: 100%;
+      height: 180px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.6;
+      padding: 14px 16px;
+      resize: vertical;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    textarea::placeholder {
+      color: var(--text3);
+    }
+
+    textarea:focus {
+      border-color: var(--border2);
+    }
+
+    /* ============================================================
+   OPÇÕES
+   ============================================================ */
+    .options-row {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.75rem;
+      color: var(--text2);
+      font-weight: 500;
+    }
+
+    select,
+    input[type="text"] {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      cursor: pointer;
+    }
+
+    select:focus,
+    input[type="text"]:focus {
+      border-color: var(--border2);
+    }
+
+    /* ============================================================
+   BOTÕES
+   ============================================================ */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 1.25rem;
+    }
+
+    .btn {
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 9px 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+    }
+
+    .btn:hover {
+      background: var(--surface3);
+      border-color: var(--text3);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #060e1e;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-d);
+      border-color: var(--accent-d);
+    }
+
+    .btn-primary svg {
+      stroke: #060e1e;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text2);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+
+    /* ============================================================
+   ALERTA / MENSAGENS
+   ============================================================ */
+    .alert {
+      display: none;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+      font-family: var(--mono);
+      line-height: 1.5;
+    }
+
+    .alert.show {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .alert svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .alert-err {
+      background: var(--danger-bg);
+      border: 1px solid rgba(255, 92, 92, 0.25);
+      color: var(--danger);
+    }
+
+    .alert-ok {
+      background: var(--accent-bg);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      color: var(--accent);
+    }
+
+    .alert-warn {
+      background: var(--warn-bg);
+      border: 1px solid rgba(255, 184, 77, 0.2);
+      color: var(--warn);
+    }
+
+    /* ============================================================
+   LOADER
+   ============================================================ */
+    .loader {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text2);
+      font-family: var(--mono);
+      padding: 10px 0;
+    }
+
+    .loader.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ============================================================
+   RESULTADO
+   ============================================================ */
+    #result-section {
+      display: none;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      text-align: center;
+    }
+
+    .stat-card .stat-type {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .stat-count {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-card.stat-total {
+      border-color: rgba(0, 229, 160, 0.25);
+      background: var(--accent-bg);
+    }
+
+    .stat-card.stat-total .stat-count {
+      color: var(--accent);
+    }
+
+    /* Prévia */
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .preview-header span {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .preview-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text2);
+      max-height: 260px;
+      overflow-y: auto;
+      line-height: 1.7;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .preview-box::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    .preview-box::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .preview-box::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
+
+    /* Colorização das linhas na prévia */
+    .line-F {
+      color: #60c8ff;
+    }
+
+    .line-P {
+      color: #00c8f0;
+    }
+
+    .line-D {
+      color: #ffb84d;
+    }
+
+    .line-T {
+      color: #a0d4ff;
+    }
+
+    .line-M {
+      color: #7eb0d4;
+    }
+
+    /* Erros */
+    .erros-box {
+      margin-top: 1rem;
+      background: var(--danger-bg);
+      border: 1px solid rgba(255, 92, 92, 0.2);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+
+    .erros-box p {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--danger);
+      line-height: 1.7;
+    }
+
+    /* Download row */
+    .download-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 1.25rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .download-name-field {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .download-name-field input {
+      width: 100%;
+      font-size: 0.8rem;
+    }
+
+    /* ============================================================
+   DASHBOARD — SELEÇÃO DE PREFEITURA
+   ============================================================ */
+    #screen-dashboard {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .dashboard-header {
+      text-align: center;
+      margin-bottom: 2.75rem;
+    }
+
+    .dashboard-header .header-icon {
+      margin: 0 auto 1.25rem;
+      width: 60px;
+      height: 60px;
+      background: var(--accent-bg2);
+      border: 1px solid rgba(0, 200, 240, 0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 24px rgba(0, 200, 240, 0.15);
+    }
+
+    .dashboard-header .header-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--accent);
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.7rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .dashboard-header p {
+      font-size: 0.875rem;
+      color: var(--text2);
+    }
+
+    .dashboard-section-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 0.85rem;
+    }
+
+    .prefeitura-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .prefeitura-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.5rem;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, transform 0.18s, box-shadow 0.18s;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prefeitura-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), rgba(0, 200, 240, 0.3));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.22s;
+    }
+
+    .prefeitura-card:hover {
+      border-color: rgba(0, 200, 240, 0.5);
+      background: var(--accent-bg);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 200, 240, 0.1);
+    }
+
+    .prefeitura-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .prefeitura-card:active {
+      transform: translateY(0);
+    }
+
+    .card-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--accent-bg2);
+      border: 1px solid rgba(0, 200, 240, 0.2);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--accent);
+    }
+
+    .card-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .card-status {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid rgba(0, 200, 240, 0.18);
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .card-arrow {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      color: var(--text3);
+      transition: color 0.18s, transform 0.18s;
+    }
+
+    .prefeitura-card:hover .card-arrow {
+      color: var(--accent);
+      transform: translateX(3px);
+    }
+
+    /* Card especial — Sem Prefeitura */
+    .card-sem-prefeitura {
+      background: transparent;
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius);
+      padding: 0.9rem 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      position: relative;
+    }
+
+    .card-sem-prefeitura::before {
+      display: none;
+    }
+
+    .card-sem-prefeitura:hover {
+      border-color: var(--border2);
+      background: rgba(255, 255, 255, 0.03);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .card-sem-prefeitura .card-icon {
+      width: 30px;
+      height: 30px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      flex-shrink: 0;
+    }
+
+    .card-sem-prefeitura .card-icon svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--text3);
+    }
+
+    .card-sem-prefeitura .card-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text2);
+    }
+
+    .card-sem-prefeitura .card-status {
+      font-size: 0.6rem;
+      color: var(--text3);
+      background: transparent;
+      border-color: var(--border);
+      margin-left: auto;
+    }
+
+    .card-sem-prefeitura .card-arrow {
+      position: static;
+      color: var(--text3);
+      flex-shrink: 0;
+    }
+
+    .card-sem-prefeitura:hover .card-arrow {
+      color: var(--text2);
+      transform: translateX(2px);
+    }
+
+    /* Breadcrumb de volta */
+    .back-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-back svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+    }
+
+    .btn-back:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .breadcrumb-name {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid rgba(0, 229, 160, 0.2);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    #screen-processor {
+      display: none;
+    }
+
+    /* ============================================================
+   RODAPÉ
+   ============================================================ */
+    footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    footer p {
+      font-size: 0.72rem;
+      color: var(--text3);
+      font-family: var(--mono);
+    }
+
+    /* ============================================================
+   RESPONSIVO
+   ============================================================ */
+    @media (max-width: 700px) {
+      .prefeitura-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .app {
+        padding: 1.5rem 1rem 4rem;
+      }
+
+      .header {
+        flex-wrap: wrap;
+      }
+
+      .options-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- ========================================================
+         TELA 1 — DASHBOARD DE SELEÇÃO DE PREFEITURA
+         ======================================================== -->
+    <div id="screen-dashboard">
+
+      <div class="dashboard-header">
+        <div class="header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+        </div>
+        <h1>Gerador de Contra Cheque</h1>
+        <p>Selecione a prefeitura para aplicar a formatação correta</p>
+      </div>
+
+      <div class="dashboard-section-label">Selecione a prefeitura</div>
+
+      <div class="prefeitura-grid">
+
+        <div class="prefeitura-card" onclick="selecionarPrefeitura('nova_lacerda', 'Nova Lacerda')">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </div>
+          <span class="card-name">Nova Lacerda</span>
+          <span class="card-status">Configurada</span>
+          <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" width="16" height="16">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </div>
+
+        <div class="prefeitura-card" onclick="selecionarPrefeitura('tangara', 'Tangará da Serra')">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </div>
+          <span class="card-name">Tangará da Serra</span>
+          <span class="card-status">Configurada</span>
+          <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" width="16" height="16">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </div>
+
+        <div class="prefeitura-card" onclick="selecionarPrefeitura('primavera', 'Primavera do Leste')">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          </div>
+          <span class="card-name">Primavera do Leste</span>
+          <span class="card-status">Configurada</span>
+          <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" width="16" height="16">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </div>
+
+
+      </div>
+
+      <div class="dashboard-section-label" style="margin-top:1.5rem">Ou use sem configuração específica</div>
+
+      <div class="card-sem-prefeitura" onclick="selecionarPrefeitura('geral', 'Sem Prefeitura')">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+          </svg>
+        </div>
+        <span class="card-name">Sem Prefeitura</span>
+        <span class="card-status">Processamento padrão</span>
+        <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" width="14" height="14">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </div>
+
+    </div><!-- /screen-dashboard -->
+
+    <!-- ========================================================
+         TELA 2 — PROCESSADOR
+         ======================================================== -->
+    <div id="screen-processor">
+
+      <!-- BOTÃO VOLTAR + BREADCRUMB -->
+      <div class="back-row">
+        <button class="btn-back" onclick="voltarDashboard()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          Voltar
+        </button>
+        <span class="breadcrumb-name" id="breadcrumb-name"></span>
+      </div>
+
+      <!-- CABEÇALHO -->
+      <header class="header">
+        <div class="header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+        </div>
+        <div class="header-text">
+          <h1>Gerador de Contra Cheque</h1>
+          <p>Converte arquivo base da folha de pagamento em TXT formatado para importação</p>
+        </div>
+        <span class="version-badge">v2.0</span>
+      </header>
+
+      <!-- ALERTA GLOBAL -->
+      <div class="alert alert-err" id="alert-err">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <span id="alert-err-msg"></span>
+      </div>
+
+      <!-- ENTRADA DE DADOS -->
+      <div class="section">
+        <div class="section-label">01 — Arquivo de entrada</div>
+
+        <div class="tabs">
+          <button class="tab-btn active" id="tab-upload-btn" onclick="switchTab('upload')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            Carregar arquivo
+          </button>
+          <button class="tab-btn" id="tab-paste-btn" onclick="switchTab('paste')">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+            </svg>
+            Colar texto
+          </button>
+        </div>
+
+        <!-- TAB UPLOAD -->
+        <div id="tab-upload">
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+            ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+
+            <div id="drop-default">
+              <div class="drop-zone-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </div>
+              <p><strong>Clique para escolher</strong> ou arraste o arquivo aqui</p>
+              <p><small>CSV ou TXT separado por ponto-e-vírgula</small></p>
+            </div>
+
+            <div id="drop-file" style="display:none">
+              <div class="file-info">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <span id="file-name-label">—</span>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="file-input" accept=".csv,.txt" onchange="onFileChange(this)">
+        </div>
+
+        <!-- TAB PASTE -->
+        <div id="tab-paste" style="display:none">
+          <textarea id="paste-area"
+            placeholder="Cole aqui o conteúdo do arquivo base&#10;Exemplo: F;001;007002;60447770144;..."></textarea>
+        </div>
+      </div>
+
+      <!-- OPÇÕES -->
+      <div class="section">
+        <div class="section-label">02 — Configurações</div>
+        <div class="options-row">
+          <div class="field">
+            <label for="sep-select">Separador de colunas</label>
+            <select id="sep-select">
+              <option value=";">Ponto-e-vírgula ( ; )</option>
+              <option value=",">Vírgula ( , )</option>
+              <option value="&#9;">Tabulação ( → )</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="enc-select">Encoding do arquivo</label>
+            <select id="enc-select">
+              <option value="latin-1">Latin-1 (padrão BR)</option>
+              <option value="utf-8">UTF-8</option>
+              <option value="utf-8-sig">UTF-8 com BOM</option>
+              <option value="cp1252">Windows-1252</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- AÇÕES -->
+      <div class="section">
+        <div class="section-label">03 — Processar</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-processar" onclick="processar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Processar arquivo
+          </button>
+          <button class="btn btn-ghost" onclick="limpar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10" />
+              <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+            </svg>
+            Limpar
+          </button>
+        </div>
+        <div class="loader" id="loader">
+          <div class="spinner"></div>
+          <span>Processando...</span>
+        </div>
+      </div>
+
+      <!-- RESULTADO -->
+      <div id="result-section">
+
+        <div class="section-label">04 — Resultado</div>
+
+        <div class="alert alert-ok show" id="alert-ok">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <span id="alert-ok-msg"></span>
+        </div>
+
+        <div class="stats-grid" id="stats-grid"></div>
+
+        <div class="preview-header">
+          <span>Prévia do arquivo gerado</span>
+          <span id="preview-hint"></span>
+        </div>
+        <div class="preview-box" id="preview-box"></div>
+
+        <div id="erros-box" class="erros-box" style="display:none">
+          <p id="erros-content"></p>
+        </div>
+
+        <div class="download-row">
+          <div class="download-name-field field">
+            <label for="nome-saida">Nome do arquivo de saída</label>
+            <input type="text" id="nome-saida" value="CONTRA_CHEQUE.txt" spellcheck="false">
+          </div>
+          <button class="btn btn-primary" id="btn-download" onclick="baixar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Baixar TXT
+          </button>
+        </div>
+
+      </div><!-- /result-section -->
+
+      <footer>
+        <p>Contra Cheque Gerador &mdash; Folha de Pagamento</p>
+        <p id="footer-info">Nenhum arquivo processado</p>
+      </footer>
+
+    </div><!-- /screen-processor -->
+
+    <script>
+      'use strict';
+
+      /* ============================================================
+         ESTADO
+         ============================================================ */
+      let activeTab = 'upload';
+      let selectedFile = null;   // File object
+      let lastResult = null;   // último resultado do servidor
+      let prefeituraAtual = null;   // prefeitura selecionada no dashboard
+
+      /* ============================================================
+         NAVEGAÇÃO ENTRE TELAS
+         ============================================================ */
+      function selecionarPrefeitura(id, nome) {
+        prefeituraAtual = id;
+        document.getElementById('breadcrumb-name').textContent = nome;
+        document.getElementById('screen-dashboard').style.display = 'none';
+        document.getElementById('screen-processor').style.display = 'block';
+        limpar();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function voltarDashboard() {
+        prefeituraAtual = null;
+        document.getElementById('screen-processor').style.display = 'none';
+        document.getElementById('screen-dashboard').style.display = 'flex';
+        limpar();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      /* ============================================================
+         TABS
+         ============================================================ */
+      function switchTab(tab) {
+        activeTab = tab;
+        document.getElementById('tab-upload').style.display = tab === 'upload' ? '' : 'none';
+        document.getElementById('tab-paste').style.display = tab === 'paste' ? '' : 'none';
+        document.getElementById('tab-upload-btn').classList.toggle('active', tab === 'upload');
+        document.getElementById('tab-paste-btn').classList.toggle('active', tab === 'paste');
+        esconderResultado();
+      }
+
+      /* ============================================================
+         DROP ZONE
+         ============================================================ */
+      function onDragOver(e) {
+        e.preventDefault();
+        document.getElementById('drop-zone').classList.add('drag-over');
+      }
+
+      function onDragLeave(e) {
+        document.getElementById('drop-zone').classList.remove('drag-over');
+      }
+
+      function onDrop(e) {
+        e.preventDefault();
+        document.getElementById('drop-zone').classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) aplicarArquivo(file);
+      }
+
+      function onFileChange(input) {
+        if (input.files[0]) aplicarArquivo(input.files[0]);
+      }
+
+      function aplicarArquivo(file) {
+        selectedFile = file;
+        const zone = document.getElementById('drop-zone');
+        zone.classList.add('has-file');
+        document.getElementById('drop-default').style.display = 'none';
+        document.getElementById('drop-file').style.display = '';
+        document.getElementById('file-name-label').textContent =
+          `${file.name}  (${(file.size / 1024).toFixed(1)} KB)`;
+        esconderResultado();
+        esconderAlerta();
+      }
+
+      /* ============================================================
+         PROCESSAMENTO — chama o backend
+         ============================================================ */
+      async function processar() {
+        esconderAlerta();
+        esconderResultado();
+
+        const sep = document.getElementById('sep-select').value;
+        const encoding = document.getElementById('enc-select').value;
+
+        let body;
+
+        if (activeTab === 'upload') {
+          if (!selectedFile) { mostrarErro('Selecione um arquivo antes de processar.'); return; }
+          const fd = new FormData();
+          fd.append('arquivo', selectedFile);
+          fd.append('sep', sep);
+          fd.append('encoding', encoding);
+          fd.append('prefeitura', prefeituraAtual || '');
+          body = fd;
+        } else {
+          const conteudo = document.getElementById('paste-area').value.trim();
+          if (!conteudo) { mostrarErro('Cole o conteúdo do arquivo antes de processar.'); return; }
+          body = JSON.stringify({ conteudo, sep, prefeitura: prefeituraAtual });
+        }
+
+        setLoading(true);
+
+        try {
+          const res = await fetch('/api/processar', {
+            method: 'POST',
+            body,
+            ...(activeTab === 'paste' ? { headers: { 'Content-Type': 'application/json' } } : {}),
+          });
+
+          const json = await res.json();
+
+          if (!res.ok || !json.sucesso) {
+            mostrarErro(json.erro || 'Erro ao processar. Verifique o separador e o formato do arquivo.');
+            return;
+          }
+
+          lastResult = json;
+          exibirResultado(json);
+
+        } catch (err) {
+          mostrarErro(`Erro de conexão com o servidor: ${err.message}`);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      /* ============================================================
+         DOWNLOAD — chama o backend
+         ============================================================ */
+      async function baixar() {
+        if (!lastResult) return;
+
+        const sep = document.getElementById('sep-select').value;
+        const encoding = document.getElementById('enc-select').value;
+        const nomeSaida = document.getElementById('nome-saida').value.trim() || 'CONTRA_CHEQUE.txt';
+
+        let body;
+
+        if (activeTab === 'upload') {
+          if (!selectedFile) { mostrarErro('Arquivo não encontrado. Processe novamente.'); return; }
+          const fd = new FormData();
+          fd.append('arquivo', selectedFile);
+          fd.append('sep', sep);
+          fd.append('encoding', encoding);
+          fd.append('nome_saida', nomeSaida);
+          fd.append('prefeitura', prefeituraAtual || '');
+          body = fd;
+        } else {
+          const conteudo = document.getElementById('paste-area').value.trim();
+          body = JSON.stringify({ conteudo, sep, nome_saida: nomeSaida, prefeitura: prefeituraAtual });
+        }
+
+        setLoading(true);
+
+        try {
+          const res = await fetch('/api/download', {
+            method: 'POST',
+            body,
+            ...(activeTab === 'paste' ? { headers: { 'Content-Type': 'application/json' } } : {}),
+          });
+
+          if (!res.ok) {
+            const json = await res.json().catch(() => ({}));
+            mostrarErro(json.erro || 'Erro ao gerar o arquivo de download.');
+            return;
+          }
+
+          // Dispara download via blob
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = nomeSaida;
+          a.click();
+          URL.revokeObjectURL(url);
+
+        } catch (err) {
+          mostrarErro(`Erro de conexão: ${err.message}`);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      /* ============================================================
+         EXIBIÇÃO DE RESULTADO
+         ============================================================ */
+      function exibirResultado(json) {
+        const s = json.stats;
+
+        // Stats
+        const grid = document.getElementById('stats-grid');
+        grid.innerHTML = `
+    ${statCard('F', 'Funcionários', s.F)}
+    ${statCard('P', 'Proventos', s.P)}
+    ${statCard('D', 'Descontos', s.D)}
+    ${statCard('T', 'Totais', s.T)}
+    ${statCard('M', 'Mensagens', s.M)}
+    <div class="stat-card stat-total">
+      <div class="stat-type">Linhas geradas</div>
+      <div class="stat-count">${json.total_linhas}</div>
+    </div>
+  `;
+
+        // Alerta de sucesso
+        document.getElementById('alert-ok-msg').textContent =
+          `Processado com sucesso — ${json.total_linhas} linhas geradas.`;
+        document.getElementById('alert-ok').style.display = 'flex';
+
+        // Prévia colorizada
+        const preview = document.getElementById('preview-box');
+        const hint = document.getElementById('preview-hint');
+        const linhas = json.preview;
+        const temMais = json.total_linhas > linhas.length;
+
+        hint.textContent = temMais
+          ? `Exibindo ${linhas.length} de ${json.total_linhas} linhas`
+          : `${json.total_linhas} linhas`;
+
+        preview.innerHTML = linhas.map(linha => {
+          const tipo = linha.charAt(0);
+          const cls = ['F', 'P', 'D', 'T', 'M'].includes(tipo) ? `line-${tipo}` : '';
+          return `<span class="${cls}">${escHtml(linha)}</span>`;
+        }).join('\n');
+
+        // Erros
+        const errosBox = document.getElementById('erros-box');
+        if (json.erros && json.erros.length > 0) {
+          document.getElementById('erros-content').textContent =
+            `⚠ ${json.erros.length} linha(s) com problema:\n` + json.erros.join('\n');
+          errosBox.style.display = '';
+        } else {
+          errosBox.style.display = 'none';
+        }
+
+        // Footer
+        document.getElementById('footer-info').textContent =
+          `Último processamento: ${new Date().toLocaleTimeString('pt-BR')}`;
+
+        document.getElementById('result-section').style.display = 'block';
+        document.getElementById('result-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function statCard(tipo, label, count) {
+        return `
+    <div class="stat-card">
+      <div class="stat-type">${label} (${tipo})</div>
+      <div class="stat-count">${count}</div>
+    </div>`;
+      }
+
+      /* ============================================================
+         HELPERS
+         ============================================================ */
+      function mostrarErro(msg) {
+        document.getElementById('alert-err-msg').textContent = msg;
+        document.getElementById('alert-err').classList.add('show');
+      }
+
+      function esconderAlerta() {
+        document.getElementById('alert-err').classList.remove('show');
+      }
+
+      function esconderResultado() {
+        document.getElementById('result-section').style.display = 'none';
+        document.getElementById('alert-ok').style.display = 'none';
+        lastResult = null;
+      }
+
+      function setLoading(on) {
+        document.getElementById('loader').classList.toggle('show', on);
+        document.getElementById('btn-processar').disabled = on;
+        document.getElementById('btn-download') && (document.getElementById('btn-download').disabled = on);
+      }
+
+      function limpar() {
+        selectedFile = null;
+        lastResult = null;
+        document.getElementById('drop-zone').classList.remove('has-file', 'drag-over');
+        document.getElementById('drop-default').style.display = '';
+        document.getElementById('drop-file').style.display = 'none';
+        document.getElementById('file-input').value = '';
+        document.getElementById('paste-area').value = '';
+        esconderAlerta();
+        esconderResultado();
+      }
+
+      function escHtml(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      /* ============================================================
+         DRAG & DROP no body inteiro (UX extra)
+         ============================================================ */
+      document.addEventListener('dragover', e => e.preventDefault());
+      document.addEventListener('drop', e => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file && activeTab === 'upload') aplicarArquivo(file);
+      });
+    </script>
+
+</body>
+
+</html>
