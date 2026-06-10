@@ -13,6 +13,7 @@ O frontend deve estar na mesma pasta (index.html).
 
 import re
 import io
+import unicodedata
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, send_file, send_from_directory
 
@@ -26,6 +27,18 @@ app = Flask(__name__, static_folder=".", static_url_path="")
 
 def so_numeros(texto: str) -> str:
     return re.sub(r"[^0-9]", "", texto or "")
+
+
+def normalizar_texto(texto: str) -> str:
+    """
+    Remove acentos e substitui caracteres especiais por equivalentes ASCII.
+    Ex: ç → c, ã → a, é → e, Á → A, etc.
+    """
+    return "".join(
+        c
+        for c in unicodedata.normalize("NFD", texto or "")
+        if unicodedata.category(c) != "Mn"
+    )
 
 
 def remover_letras(texto: str) -> str:
@@ -69,6 +82,83 @@ def formatar_referencia(valor: str) -> str:
         return valor
 
 
+def formatar_referencia_nova_lacerda(valor: str) -> str:
+    """
+    Nova Lacerda — col Referência (H).
+    • Se contém letra D ou H → '0.00'
+    • Padrão de parcelas (ex: '6/72', '056/096') → mantém
+    • Demais → limpa e formata como decimal com ponto (ex: '40.00')
+    """
+    valor = (valor or "").strip().replace(" ", "")
+    if not valor:
+        return "0.00"
+    if re.search(r"[DdHh]", valor):
+        return "0.00"
+    if re.match(r"^\d+/\d+$", valor):
+        return valor
+    limpo = re.sub(r"[^0-9.,]", "", valor).replace(",", ".")
+    if not limpo:
+        return "0.00"
+    try:
+        return f"{float(limpo):.2f}"
+    except ValueError:
+        return "0.00"
+
+
+def formatar_valor_nova_lacerda(valor: str) -> str:
+    """
+    Nova Lacerda — col Valor (I): somente pontos e números.
+    """
+    return re.sub(r"[^0-9.]", "", valor or "")
+
+
+def formatar_referencia_tangara(valor: str) -> str:
+    """
+    Tangará da Serra — col Referência.
+    • Vazio ou '.' → '0.00'
+    • Remove espaços internos
+    • Padrão de parcelas → mantém
+    • Trata vírgula como decimal; saída com ponto (ex: '31.00')
+    """
+    valor = (valor or "").strip()
+    if not valor or valor == ".":
+        return "0.00"
+    valor = valor.replace(" ", "")
+    if re.match(r"^\d+/\d+$", valor):
+        return valor
+    m = re.match(r"^(\d+)(?:[.,]\d+)?([A-Za-z]+)$", valor)
+    if m:
+        return "0.00"
+    val_norm = valor.replace(",", ".")
+    try:
+        return f"{float(val_norm):.2f}"
+    except ValueError:
+        return valor
+
+
+def formatar_referencia_primavera(valor: str) -> str:
+    """
+    Primavera do Leste — col Referência.
+    • Remove sufixo de letra (D, H, etc.) mas mantém o valor decimal
+    • Padrão de parcelas → mantém
+    • Saída com ponto decimal (ex: '30.00', '40.00')
+    """
+    valor = (valor or "").strip().replace(" ", "")
+    if not valor:
+        return "0.00"
+    if re.match(r"^\d+/\d+$", valor):
+        return valor
+    # Remove letra(s) no final, preserva número
+    m = re.match(r"^([\d.,]+)[A-Za-z]+$", valor)
+    if m:
+        valor = m.group(1)
+    val_norm = valor.replace(",", ".")
+    try:
+        return f"{float(val_norm):.2f}"
+    except ValueError:
+        return valor
+
+
 def _serial_excel_para_data(serial: int) -> datetime:
     return datetime(1899, 12, 30) + timedelta(days=serial)
 
@@ -95,6 +185,13 @@ def formatar_data(valor: str, formato: str) -> str:
     if dt is None and re.match(r"^\d{1,2}/\d{1,2}/\d{4}", valor):
         try:
             dt = datetime.strptime(valor[:10], "%d/%m/%Y")
+        except ValueError:
+            return valor
+
+    # DDMMAAAA sem separadores (ex: 02091963 → 02/09/1963)
+    if dt is None and re.match(r"^\d{8}$", valor):
+        try:
+            dt = datetime.strptime(valor, "%d%m%Y")
         except ValueError:
             return valor
 
@@ -263,18 +360,343 @@ ORDEM_SAIDA = ["F", "P", "D", "T", "M"]
 
 
 # ============================================================
+# PROCESSADORES ESPECÍFICOS POR PREFEITURA
+# ============================================================
+
+# ---- Nova Lacerda ----
+
+
+def processar_linha_f_nova_lacerda(cols):
+    """Nova Lacerda — Linha F: strip em campos de texto (nomes vêm com espaços de preenchimento)."""
+    return ";".join(
+        [
+            "F",
+            _c(cols, 1).strip(),
+            _c(cols, 2).strip(),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5).strip(),  # Nome — remove espaços de preenchimento
+            _c(cols, 6).strip(),
+            _c(cols, 7).strip(),
+            _c(cols, 8).strip(),
+            formatar_data(_c(cols, 9), "DD/MM/AAAA"),
+            formatar_data(_c(cols, 10), "DD/MM/AAAA"),
+            formatar_data(_c(cols, 11), "MM/AAAA"),
+            _c(cols, 12).strip(),
+            _c(cols, 13).strip(),
+            _c(cols, 14).strip(),
+            _c(cols, 15).strip(),
+            _c(cols, 16).strip(),
+            _c(cols, 17).strip(),
+            _c(cols, 18).strip(),
+            _c(cols, 19).strip(),
+            _c(cols, 20).strip(),
+            _c(cols, 21).strip(),
+            "0",  # Dependentes (zerar)
+            "0",  # Plano Carreira (zerar)
+        ]
+    )
+
+
+def processar_linha_p_nova_lacerda(cols):
+    """Nova Lacerda — Linha P: referência sem letras D/H (→ 0.00); valor só dígitos+ponto."""
+    return ";".join(
+        [
+            "P",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5),
+            _c(cols, 6),
+            formatar_referencia_nova_lacerda(_c(cols, 7)),
+            formatar_valor_nova_lacerda(_c(cols, 8)),
+        ]
+    )
+
+
+def processar_linha_d_nova_lacerda(cols):
+    """Nova Lacerda — Linha D: mesma regra da Linha P."""
+    return ";".join(
+        [
+            "D",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5),
+            _c(cols, 6),
+            formatar_referencia_nova_lacerda(_c(cols, 7)),
+            formatar_valor_nova_lacerda(_c(cols, 8)),
+        ]
+    )
+
+
+# ---- Tangará da Serra ----
+
+
+def processar_linha_f_tangara(cols):
+    """Tangará — Linha F: preserva o número real de dependentes (col 22)."""
+    return ";".join(
+        [
+            "F",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5),
+            _c(cols, 6),
+            _c(cols, 7),
+            _c(cols, 8),
+            formatar_data(_c(cols, 9), "DD/MM/AAAA"),
+            formatar_data(_c(cols, 10), "DD/MM/AAAA"),
+            formatar_data(_c(cols, 11), "MM/AAAA"),
+            _c(cols, 12),
+            _c(cols, 13),
+            _c(cols, 14),
+            _c(cols, 15),
+            _c(cols, 16),
+            _c(cols, 17),
+            _c(cols, 18),
+            _c(cols, 19),
+            _c(cols, 20),
+            _c(cols, 21),
+            _c(cols, 22),  # dependentes: valor real do arquivo
+            "0",
+        ]
+    )
+
+
+def processar_linha_p_tangara(cols):
+    """Tangará — Linha P: referência sem espaços/virgula, ponto decimal."""
+    return ";".join(
+        [
+            "P",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5),
+            _c(cols, 6),
+            formatar_referencia_tangara(_c(cols, 7)),
+            remover_letras(_c(cols, 8)),
+        ]
+    )
+
+
+def processar_linha_d_tangara(cols):
+    """Tangará — Linha D: mesma regra da Linha P."""
+    return ";".join(
+        [
+            "D",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5),
+            _c(cols, 6),
+            formatar_referencia_tangara(_c(cols, 7)),
+            remover_letras(_c(cols, 8)),
+        ]
+    )
+
+
+def processar_linha_t_tangara(cols):
+    """Tangará — Linha T: zera col F (TotalProventos) e col K (BaseFGTS)."""
+    return ";".join(
+        [
+            "T",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            "0",  # col F — TotalProventos → zerado
+            remover_letras(_c(cols, 6)),
+            remover_letras(_c(cols, 7)),
+            remover_letras(_c(cols, 8)),
+            remover_letras(_c(cols, 9)),
+            "0",  # col K — BaseFGTS → zerado
+            remover_letras(_c(cols, 11)),
+            remover_letras(_c(cols, 12)),
+            remover_letras(_c(cols, 13)),
+            _c(cols, 14),
+            _c(cols, 15),
+            _c(cols, 16),
+            _c(cols, 17),
+            _c(cols, 18),
+        ]
+    )
+
+
+# ---- Primavera do Leste ----
+
+
+def processar_linha_f_primavera(cols):
+    """Primavera — Linha F: preserva dependentes; remove espaços do NomeVínculo (col 16)."""
+    return ";".join(
+        [
+            "F",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5),
+            _c(cols, 6),
+            _c(cols, 7),
+            _c(cols, 8),
+            formatar_data(_c(cols, 9), "DD/MM/AAAA"),  # suporta DDMMAAAA
+            formatar_data(_c(cols, 10), "DD/MM/AAAA"),
+            formatar_data(_c(cols, 11), "MM/AAAA"),
+            _c(cols, 12),
+            _c(cols, 13),
+            _c(cols, 14),
+            _c(cols, 15),
+            _c(cols, 16).strip(),  # NomeVínculo sem espaços extras
+            _c(cols, 17),
+            _c(cols, 18),
+            _c(cols, 19),
+            _c(cols, 20),
+            _c(cols, 21),
+            _c(cols, 22),  # dependentes: valor real do arquivo
+            "0",
+        ]
+    )
+
+
+def processar_linha_p_primavera(cols):
+    """Primavera — Linha P: remove letra do sufixo da referência, mantém decimal."""
+    return ";".join(
+        [
+            "P",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5),
+            _c(cols, 6),
+            formatar_referencia_primavera(_c(cols, 7)),
+            remover_letras(_c(cols, 8)),
+        ]
+    )
+
+
+def processar_linha_d_primavera(cols):
+    """Primavera — Linha D: mesma regra da Linha P."""
+    return ";".join(
+        [
+            "D",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            _c(cols, 5),
+            _c(cols, 6),
+            formatar_referencia_primavera(_c(cols, 7)),
+            remover_letras(_c(cols, 8)),
+        ]
+    )
+
+
+def processar_linha_t_primavera(cols):
+    """Primavera — Linha T: zera col J (SalContribINSS)."""
+    return ";".join(
+        [
+            "T",
+            _c(cols, 1),
+            _c(cols, 2),
+            formatar_cpf(_c(cols, 3)),
+            formatar_matricula(_c(cols, 4)),
+            remover_letras(_c(cols, 5)),
+            remover_letras(_c(cols, 6)),
+            remover_letras(_c(cols, 7)),
+            remover_letras(_c(cols, 8)),
+            "0",  # col J — SalContribINSS → zerado
+            remover_letras(_c(cols, 10)),
+            remover_letras(_c(cols, 11)),
+            remover_letras(_c(cols, 12)),
+            remover_letras(_c(cols, 13)),
+            _c(cols, 14),
+            _c(cols, 15),
+            _c(cols, 16),
+            _c(cols, 17),
+            _c(cols, 18),
+        ]
+    )
+
+
+# ============================================================
+# DICTS DE PROCESSADORES E PRÉ-PROCESSAMENTO POR PREFEITURA
+# ============================================================
+
+
+def _pre_processar_primavera(conteudo: str) -> str:
+    """Primavera: substitui código de secretaria incorreto 070374 → 070474."""
+    return conteudo.replace(";070374;", ";070474;")
+
+
+PROCESSADORES_NOVA_LACERDA = {
+    "F": processar_linha_f_nova_lacerda,
+    "P": processar_linha_p_nova_lacerda,
+    "D": processar_linha_d_nova_lacerda,
+    "T": processar_linha_t,
+    "M": processar_linha_m,
+}
+
+PROCESSADORES_TANGARA = {
+    "F": processar_linha_f_tangara,
+    "P": processar_linha_p_tangara,
+    "D": processar_linha_d_tangara,
+    "T": processar_linha_t_tangara,
+    "M": processar_linha_m,
+}
+
+PROCESSADORES_PRIMAVERA = {
+    "F": processar_linha_f_primavera,
+    "P": processar_linha_p_primavera,
+    "D": processar_linha_d_primavera,
+    "T": processar_linha_t_primavera,
+    "M": processar_linha_m,
+}
+
+_PRE_PROCESSADORES_MAP = {
+    "primavera": _pre_processar_primavera,
+}
+
+_PROCESSADORES_MAP = {
+    "nova_lacerda": PROCESSADORES_NOVA_LACERDA,
+    "tangara": PROCESSADORES_TANGARA,
+    "primavera": PROCESSADORES_PRIMAVERA,
+}
+
+
+# ============================================================
 # FUNÇÃO CORE DE PROCESSAMENTO
 # ============================================================
 
 
-def processar(conteudo: str, sep: str = ";") -> dict:
+def processar(conteudo: str, sep: str = ";", prefeitura: str = None) -> dict:
     """
     Processa o conteúdo bruto e retorna:
         linhas  : list[str]  — linhas do TXT de saída
         stats   : dict       — contagens por tipo + ignoradas
         erros   : list[str]  — linhas com problema (não interrompem)
         sucesso : bool
+
+    O parâmetro `prefeitura` seleciona regras específicas:
+        None / 'geral'    → processamento padrão
+        'nova_lacerda'    → regras de Nova Lacerda
+        'tangara'         → regras de Tangará da Serra
+        'primavera'       → regras de Primavera do Leste
     """
+    # Normaliza acentos e ç → equivalentes ASCII (ex: ç→c, é→e, ã→a)
+    conteudo = normalizar_texto(conteudo)
+
+    # Pré-processamento específico por prefeitura
+    if prefeitura and prefeitura in _PRE_PROCESSADORES_MAP:
+        conteudo = _PRE_PROCESSADORES_MAP[prefeitura](conteudo)
+
+    # Seleciona o conjunto de processadores
+    procs = _PROCESSADORES_MAP.get(prefeitura, PROCESSADORES)
     buckets = {t: [] for t in ORDEM_SAIDA}
     stats = {t: 0 for t in ORDEM_SAIDA}
     stats["ignoradas"] = 0
@@ -287,12 +709,12 @@ def processar(conteudo: str, sep: str = ";") -> dict:
         cols = linha.split(sep)
         tipo = cols[0].strip().upper() if len(cols) > 0 else ""
 
-        if tipo not in PROCESSADORES:
+        if tipo not in procs:
             stats["ignoradas"] += 1
             continue
 
         try:
-            buckets[tipo].append(PROCESSADORES[tipo](cols))
+            buckets[tipo].append(procs[tipo](cols))
             stats[tipo] += 1
         except Exception as exc:
             erros.append(f"Linha {num} (tipo {tipo}): {exc}")
@@ -338,10 +760,12 @@ def api_processar():
     """
     sep = ";"
     conteudo = ""
+    prefeitura = None
 
     if request.content_type and "multipart" in request.content_type:
         sep = request.form.get("sep", ";")
         encoding = request.form.get("encoding", "latin-1")
+        prefeitura = request.form.get("prefeitura") or None
         arquivo = request.files.get("arquivo")
         if not arquivo:
             return jsonify({"sucesso": False, "erro": "Nenhum arquivo enviado."}), 400
@@ -354,6 +778,7 @@ def api_processar():
         dados = request.get_json(force=True)
         conteudo = dados.get("conteudo", "")
         sep = dados.get("sep", ";")
+        prefeitura = dados.get("prefeitura") or None
 
     else:
         return jsonify({"sucesso": False, "erro": "Content-Type não suportado."}), 415
@@ -361,7 +786,7 @@ def api_processar():
     if not conteudo.strip():
         return jsonify({"sucesso": False, "erro": "Conteúdo vazio."}), 400
 
-    resultado = processar(conteudo, sep=sep)
+    resultado = processar(conteudo, sep=sep, prefeitura=prefeitura)
 
     return jsonify(
         {
@@ -384,11 +809,13 @@ def api_download():
     sep = ";"
     conteudo = ""
     nome_saida = "CONTRA_CHEQUE.txt"
+    prefeitura = None
 
     if request.content_type and "multipart" in request.content_type:
         sep = request.form.get("sep", ";")
         encoding = request.form.get("encoding", "latin-1")
         nome_saida = request.form.get("nome_saida", nome_saida)
+        prefeitura = request.form.get("prefeitura") or None
         arquivo = request.files.get("arquivo")
         if not arquivo:
             return jsonify({"sucesso": False, "erro": "Nenhum arquivo enviado."}), 400
@@ -402,6 +829,7 @@ def api_download():
         conteudo = dados.get("conteudo", "")
         sep = dados.get("sep", ";")
         nome_saida = dados.get("nome_saida", nome_saida)
+        prefeitura = dados.get("prefeitura") or None
 
     else:
         return jsonify({"sucesso": False, "erro": "Content-Type não suportado."}), 415
@@ -409,7 +837,7 @@ def api_download():
     if not conteudo.strip():
         return jsonify({"sucesso": False, "erro": "Conteúdo vazio."}), 400
 
-    resultado = processar(conteudo, sep=sep)
+    resultado = processar(conteudo, sep=sep, prefeitura=prefeitura)
 
     if not resultado["sucesso"]:
         return (

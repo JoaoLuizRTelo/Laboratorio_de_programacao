@@ -22,19 +22,19 @@
     }
 
     :root {
-      --bg: #0d0d0d;
-      --surface: #161616;
-      --surface2: #1f1f1f;
-      --surface3: #2a2a2a;
-      --border: #2e2e2e;
-      --border2: #3d3d3d;
-      --accent: #00e5a0;
-      --accent-d: #00b87d;
-      --accent-bg: rgba(0, 229, 160, 0.07);
-      --accent-bg2: rgba(0, 229, 160, 0.13);
-      --text: #f0f0f0;
-      --text2: #9a9a9a;
-      --text3: #5a5a5a;
+      --bg: #060e1e;
+      --surface: #0c1830;
+      --surface2: #112044;
+      --surface3: #182d5c;
+      --border: #1e3470;
+      --border2: #2a4a96;
+      --accent: #00c8f0;
+      --accent-d: #009bbf;
+      --accent-bg: rgba(0, 200, 240, 0.08);
+      --accent-bg2: rgba(0, 200, 240, 0.15);
+      --text: #e8f4ff;
+      --text2: #7aaec8;
+      --text3: #3a6080;
       --danger: #ff5c5c;
       --danger-bg: rgba(255, 92, 92, 0.08);
       --warn: #ffb84d;
@@ -383,7 +383,7 @@
 
     .btn-primary {
       background: var(--accent);
-      color: #000;
+      color: #060e1e;
       border-color: var(--accent);
       font-weight: 600;
     }
@@ -394,7 +394,7 @@
     }
 
     .btn-primary svg {
-      stroke: #000;
+      stroke: #060e1e;
     }
 
     .btn-ghost {
@@ -597,11 +597,11 @@
 
     /* Colorização das linhas na prévia */
     .line-F {
-      color: #7eb8ff;
+      color: #60c8ff;
     }
 
     .line-P {
-      color: #7cefa0;
+      color: #00c8f0;
     }
 
     .line-D {
@@ -609,11 +609,11 @@
     }
 
     .line-T {
-      color: #c4a0ff;
+      color: #a0d4ff;
     }
 
     .line-M {
-      color: #ff8fa0;
+      color: #7eb0d4;
     }
 
     /* Erros */
@@ -663,32 +663,54 @@
 
     .dashboard-header {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2.75rem;
     }
 
     .dashboard-header .header-icon {
       margin: 0 auto 1.25rem;
-      width: 56px;
-      height: 56px;
+      width: 60px;
+      height: 60px;
+      background: var(--accent-bg2);
+      border: 1px solid rgba(0, 200, 240, 0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 24px rgba(0, 200, 240, 0.15);
+    }
+
+    .dashboard-header .header-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--accent);
     }
 
     .dashboard-header h1 {
-      font-size: 1.6rem;
+      font-size: 1.7rem;
       font-weight: 600;
       letter-spacing: -0.02em;
       margin-bottom: 0.5rem;
     }
 
     .dashboard-header p {
-      font-size: 0.9rem;
+      font-size: 0.875rem;
       color: var(--text2);
+    }
+
+    .dashboard-section-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 0.85rem;
     }
 
     .prefeitura-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
     }
 
     .prefeitura-card {
@@ -697,7 +719,7 @@
       border-radius: var(--radius-lg);
       padding: 1.75rem 1.5rem;
       cursor: pointer;
-      transition: border-color 0.18s, background 0.18s, transform 0.18s;
+      transition: border-color 0.18s, background 0.18s, transform 0.18s, box-shadow 0.18s;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -713,16 +735,17 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: var(--accent);
+      background: linear-gradient(90deg, var(--accent), rgba(0, 200, 240, 0.3));
       transform: scaleX(0);
       transform-origin: left;
-      transition: transform 0.2s;
+      transition: transform 0.22s;
     }
 
     .prefeitura-card:hover {
-      border-color: var(--accent);
+      border-color: rgba(0, 200, 240, 0.5);
       background: var(--accent-bg);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 200, 240, 0.1);
     }
 
     .prefeitura-card:hover::before {
@@ -734,10 +757,10 @@
     }
 
     .card-icon {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       background: var(--accent-bg2);
-      border: 1px solid rgba(0, 229, 160, 0.2);
+      border: 1px solid rgba(0, 200, 240, 0.2);
       border-radius: var(--radius);
       display: flex;
       align-items: center;
@@ -751,17 +774,18 @@
     }
 
     .card-name {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: var(--text);
+      line-height: 1.3;
     }
 
     .card-status {
       font-family: var(--mono);
-      font-size: 0.65rem;
-      color: var(--text3);
-      background: var(--surface2);
-      border: 1px solid var(--border);
+      font-size: 0.62rem;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid rgba(0, 200, 240, 0.18);
       padding: 2px 8px;
       border-radius: 20px;
       letter-spacing: 0.05em;
@@ -779,6 +803,72 @@
     .prefeitura-card:hover .card-arrow {
       color: var(--accent);
       transform: translateX(3px);
+    }
+
+    /* Card especial — Sem Prefeitura */
+    .card-sem-prefeitura {
+      background: transparent;
+      border: 1px dashed var(--border2);
+      border-radius: var(--radius);
+      padding: 0.9rem 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      position: relative;
+    }
+
+    .card-sem-prefeitura::before {
+      display: none;
+    }
+
+    .card-sem-prefeitura:hover {
+      border-color: var(--border2);
+      background: rgba(255, 255, 255, 0.03);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .card-sem-prefeitura .card-icon {
+      width: 30px;
+      height: 30px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      flex-shrink: 0;
+    }
+
+    .card-sem-prefeitura .card-icon svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--text3);
+    }
+
+    .card-sem-prefeitura .card-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text2);
+    }
+
+    .card-sem-prefeitura .card-status {
+      font-size: 0.6rem;
+      color: var(--text3);
+      background: transparent;
+      border-color: var(--border);
+      margin-left: auto;
+    }
+
+    .card-sem-prefeitura .card-arrow {
+      position: static;
+      color: var(--text3);
+      flex-shrink: 0;
+    }
+
+    .card-sem-prefeitura:hover .card-arrow {
+      color: var(--text2);
+      transform: translateX(2px);
     }
 
     /* Breadcrumb de volta */
@@ -852,6 +942,12 @@
     /* ============================================================
    RESPONSIVO
    ============================================================ */
+    @media (max-width: 700px) {
+      .prefeitura-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 600px) {
       .app {
         padding: 1.5rem 1rem 4rem;
@@ -893,19 +989,19 @@
         <p>Selecione a prefeitura para aplicar a formatação correta</p>
       </div>
 
+      <div class="dashboard-section-label">Selecione a prefeitura</div>
+
       <div class="prefeitura-grid">
 
-        <div class="prefeitura-card" onclick="selecionarPrefeitura('prefeitura1', 'Prefeitura 1')">
+        <div class="prefeitura-card" onclick="selecionarPrefeitura('nova_lacerda', 'Nova Lacerda')">
           <div class="card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2" />
-              <path d="M16 7V5a2 2 0 00-4 0v2" />
-              <line x1="12" y1="12" x2="12" y2="16" />
-              <line x1="10" y1="14" x2="14" y2="14" />
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
           </div>
-          <span class="card-name">Prefeitura 1</span>
-          <span class="card-status">Em configuração</span>
+          <span class="card-name">Nova Lacerda</span>
+          <span class="card-status">Configurada</span>
           <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" width="16" height="16">
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -913,17 +1009,15 @@
           </svg>
         </div>
 
-        <div class="prefeitura-card" onclick="selecionarPrefeitura('prefeitura2', 'Prefeitura 2')">
+        <div class="prefeitura-card" onclick="selecionarPrefeitura('tangara', 'Tangará da Serra')">
           <div class="card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2" />
-              <path d="M16 7V5a2 2 0 00-4 0v2" />
-              <line x1="12" y1="12" x2="12" y2="16" />
-              <line x1="10" y1="14" x2="14" y2="14" />
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
           </div>
-          <span class="card-name">Prefeitura 2</span>
-          <span class="card-status">Em configuração</span>
+          <span class="card-name">Tangará da Serra</span>
+          <span class="card-status">Configurada</span>
           <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" width="16" height="16">
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -931,17 +1025,15 @@
           </svg>
         </div>
 
-        <div class="prefeitura-card" onclick="selecionarPrefeitura('prefeitura3', 'Prefeitura 3')">
+        <div class="prefeitura-card" onclick="selecionarPrefeitura('primavera', 'Primavera do Leste')">
           <div class="card-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2" />
-              <path d="M16 7V5a2 2 0 00-4 0v2" />
-              <line x1="12" y1="12" x2="12" y2="16" />
-              <line x1="10" y1="14" x2="14" y2="14" />
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
           </div>
-          <span class="card-name">Prefeitura 3</span>
-          <span class="card-status">Em configuração</span>
+          <span class="card-name">Primavera do Leste</span>
+          <span class="card-status">Configurada</span>
           <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
             stroke-linejoin="round" width="16" height="16">
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -949,24 +1041,26 @@
           </svg>
         </div>
 
-        <div class="prefeitura-card" onclick="selecionarPrefeitura('prefeitura4', 'Prefeitura 4')">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="7" width="20" height="14" rx="2" />
-              <path d="M16 7V5a2 2 0 00-4 0v2" />
-              <line x1="12" y1="12" x2="12" y2="16" />
-              <line x1="10" y1="14" x2="14" y2="14" />
-            </svg>
-          </div>
-          <span class="card-name">Prefeitura 4</span>
-          <span class="card-status">Em configuração</span>
-          <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round" width="16" height="16">
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
+
+      </div>
+
+      <div class="dashboard-section-label" style="margin-top:1.5rem">Ou use sem configuração específica</div>
+
+      <div class="card-sem-prefeitura" onclick="selecionarPrefeitura('geral', 'Sem Prefeitura')">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
           </svg>
         </div>
-
+        <span class="card-name">Sem Prefeitura</span>
+        <span class="card-status">Processamento padrão</span>
+        <svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" width="14" height="14">
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
       </div>
 
     </div><!-- /screen-dashboard -->
@@ -1268,11 +1362,12 @@
           fd.append('arquivo', selectedFile);
           fd.append('sep', sep);
           fd.append('encoding', encoding);
+          fd.append('prefeitura', prefeituraAtual || '');
           body = fd;
         } else {
           const conteudo = document.getElementById('paste-area').value.trim();
           if (!conteudo) { mostrarErro('Cole o conteúdo do arquivo antes de processar.'); return; }
-          body = JSON.stringify({ conteudo, sep });
+          body = JSON.stringify({ conteudo, sep, prefeitura: prefeituraAtual });
         }
 
         setLoading(true);
@@ -1320,10 +1415,11 @@
           fd.append('sep', sep);
           fd.append('encoding', encoding);
           fd.append('nome_saida', nomeSaida);
+          fd.append('prefeitura', prefeituraAtual || '');
           body = fd;
         } else {
           const conteudo = document.getElementById('paste-area').value.trim();
-          body = JSON.stringify({ conteudo, sep, nome_saida: nomeSaida });
+          body = JSON.stringify({ conteudo, sep, nome_saida: nomeSaida, prefeitura: prefeituraAtual });
         }
 
         setLoading(true);
