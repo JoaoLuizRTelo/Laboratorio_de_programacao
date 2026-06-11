@@ -82,9 +82,9 @@ def formatar_referencia(valor: str) -> str:
         return valor
 
 
-def formatar_referencia_nova_lacerda(valor: str) -> str:
+def formatar_referencia_prefeitura1(valor: str) -> str:
     """
-    Nova Lacerda — col Referência (H).
+    Prefeitura 1 — col Referência (H).
     • Se contém letra D ou H → '0.00'
     • Padrão de parcelas (ex: '6/72', '056/096') → mantém
     • Demais → limpa e formata como decimal com ponto (ex: '40.00')
@@ -105,16 +105,16 @@ def formatar_referencia_nova_lacerda(valor: str) -> str:
         return "0.00"
 
 
-def formatar_valor_nova_lacerda(valor: str) -> str:
+def formatar_valor_prefeitura1(valor: str) -> str:
     """
-    Nova Lacerda — col Valor (I): somente pontos e números.
+    Prefeitura 1 — col Valor (I): somente pontos e números.
     """
     return re.sub(r"[^0-9.]", "", valor or "")
 
 
-def formatar_referencia_tangara(valor: str) -> str:
+def formatar_referencia_prefeitura2(valor: str) -> str:
     """
-    Tangará da Serra — col Referência.
+    Prefeitura 2 — col Referência.
     • Vazio ou '.' → '0.00'
     • Remove espaços internos
     • Padrão de parcelas → mantém
@@ -136,9 +136,9 @@ def formatar_referencia_tangara(valor: str) -> str:
         return valor
 
 
-def formatar_referencia_primavera(valor: str) -> str:
+def formatar_referencia_prefeitura3(valor: str) -> str:
     """
-    Primavera do Leste — col Referência.
+    prefeitura3 do Leste — col Referência.
     • Remove sufixo de letra (D, H, etc.) mas mantém o valor decimal
     • Padrão de parcelas → mantém
     • Saída com ponto decimal (ex: '30.00', '40.00')
@@ -363,11 +363,11 @@ ORDEM_SAIDA = ["F", "P", "D", "T", "M"]
 # PROCESSADORES ESPECÍFICOS POR PREFEITURA
 # ============================================================
 
-# ---- Nova Lacerda ----
+# ---- Prefeitura 1 ----
 
 
-def processar_linha_f_nova_lacerda(cols):
-    """Nova Lacerda — Linha F: strip em campos de texto (nomes vêm com espaços de preenchimento)."""
+def processar_linha_f_prefeitura1(cols):
+    """Prefeitura 1 — Linha F: strip em campos de texto (nomes vêm com espaços de preenchimento)."""
     return ";".join(
         [
             "F",
@@ -398,8 +398,8 @@ def processar_linha_f_nova_lacerda(cols):
     )
 
 
-def processar_linha_p_nova_lacerda(cols):
-    """Nova Lacerda — Linha P: referência sem letras D/H (→ 0.00); valor só dígitos+ponto."""
+def processar_linha_p_prefeitura1(cols):
+    """Prefeitura 1 — Linha P: referência sem letras D/H (→ 0.00); valor só dígitos+ponto."""
     return ";".join(
         [
             "P",
@@ -409,14 +409,14 @@ def processar_linha_p_nova_lacerda(cols):
             formatar_matricula(_c(cols, 4)),
             _c(cols, 5),
             _c(cols, 6),
-            formatar_referencia_nova_lacerda(_c(cols, 7)),
-            formatar_valor_nova_lacerda(_c(cols, 8)),
+            formatar_referencia_prefeitura1(_c(cols, 7)),
+            formatar_valor_prefeitura1(_c(cols, 8)),
         ]
     )
 
 
-def processar_linha_d_nova_lacerda(cols):
-    """Nova Lacerda — Linha D: mesma regra da Linha P."""
+def processar_linha_d_prefeitura1(cols):
+    """Prefeitura 1 — Linha D: mesma regra da Linha P."""
     return ";".join(
         [
             "D",
@@ -426,17 +426,17 @@ def processar_linha_d_nova_lacerda(cols):
             formatar_matricula(_c(cols, 4)),
             _c(cols, 5),
             _c(cols, 6),
-            formatar_referencia_nova_lacerda(_c(cols, 7)),
-            formatar_valor_nova_lacerda(_c(cols, 8)),
+            formatar_referencia_prefeitura1(_c(cols, 7)),
+            formatar_valor_prefeitura1(_c(cols, 8)),
         ]
     )
 
 
-# ---- Tangará da Serra ----
+# ---- Prefeitura 2 ----
 
 
-def processar_linha_f_tangara(cols):
-    """Tangará — Linha F: preserva o número real de dependentes (col 22)."""
+def processar_linha_f_prefeitura2(cols):
+    """Prefeitura 2 — Linha F: preserva o número real de dependentes (col 22)."""
     return ";".join(
         [
             "F",
@@ -467,8 +467,8 @@ def processar_linha_f_tangara(cols):
     )
 
 
-def processar_linha_p_tangara(cols):
-    """Tangará — Linha P: referência sem espaços/virgula, ponto decimal."""
+def processar_linha_p_prefeitura2(cols):
+    """Prefeitura 2 — Linha P: referência sem espaços/virgula, ponto decimal."""
     return ";".join(
         [
             "P",
@@ -478,14 +478,14 @@ def processar_linha_p_tangara(cols):
             formatar_matricula(_c(cols, 4)),
             _c(cols, 5),
             _c(cols, 6),
-            formatar_referencia_tangara(_c(cols, 7)),
+            formatar_referencia_prefeitura2(_c(cols, 7)),
             remover_letras(_c(cols, 8)),
         ]
     )
 
 
-def processar_linha_d_tangara(cols):
-    """Tangará — Linha D: mesma regra da Linha P."""
+def processar_linha_d_prefeitura2(cols):
+    """Prefeitura 2 — Linha D: mesma regra da Linha P."""
     return ";".join(
         [
             "D",
@@ -495,14 +495,14 @@ def processar_linha_d_tangara(cols):
             formatar_matricula(_c(cols, 4)),
             _c(cols, 5),
             _c(cols, 6),
-            formatar_referencia_tangara(_c(cols, 7)),
+            formatar_referencia_prefeitura2(_c(cols, 7)),
             remover_letras(_c(cols, 8)),
         ]
     )
 
 
-def processar_linha_t_tangara(cols):
-    """Tangará — Linha T: zera col F (TotalProventos) e col K (BaseFGTS)."""
+def processar_linha_t_prefeitura2(cols):
+    """Prefeitura 2 — Linha T: zera col F (TotalProventos) e col K (BaseFGTS)."""
     return ";".join(
         [
             "T",
@@ -528,11 +528,11 @@ def processar_linha_t_tangara(cols):
     )
 
 
-# ---- Primavera do Leste ----
+# ---- prefeitura3 do Leste ----
 
 
-def processar_linha_f_primavera(cols):
-    """Primavera — Linha F: preserva dependentes; remove espaços do NomeVínculo (col 16)."""
+def processar_linha_f_prefeitura3(cols):
+    """prefeitura3 — Linha F: preserva dependentes; remove espaços do NomeVínculo (col 16)."""
     return ";".join(
         [
             "F",
@@ -563,8 +563,8 @@ def processar_linha_f_primavera(cols):
     )
 
 
-def processar_linha_p_primavera(cols):
-    """Primavera — Linha P: remove letra do sufixo da referência, mantém decimal."""
+def processar_linha_p_prefeitura3(cols):
+    """prefeitura3 — Linha P: remove letra do sufixo da referência, mantém decimal."""
     return ";".join(
         [
             "P",
@@ -574,14 +574,14 @@ def processar_linha_p_primavera(cols):
             formatar_matricula(_c(cols, 4)),
             _c(cols, 5),
             _c(cols, 6),
-            formatar_referencia_primavera(_c(cols, 7)),
+            formatar_referencia_prefeitura3(_c(cols, 7)),
             remover_letras(_c(cols, 8)),
         ]
     )
 
 
-def processar_linha_d_primavera(cols):
-    """Primavera — Linha D: mesma regra da Linha P."""
+def processar_linha_d_prefeitura3(cols):
+    """prefeitura3 — Linha D: mesma regra da Linha P."""
     return ";".join(
         [
             "D",
@@ -591,14 +591,14 @@ def processar_linha_d_primavera(cols):
             formatar_matricula(_c(cols, 4)),
             _c(cols, 5),
             _c(cols, 6),
-            formatar_referencia_primavera(_c(cols, 7)),
+            formatar_referencia_prefeitura3(_c(cols, 7)),
             remover_letras(_c(cols, 8)),
         ]
     )
 
 
-def processar_linha_t_primavera(cols):
-    """Primavera — Linha T: zera col J (SalContribINSS)."""
+def processar_linha_t_prefeitura3(cols):
+    """prefeitura3 — Linha T: zera col J (SalContribINSS)."""
     return ";".join(
         [
             "T",
@@ -629,43 +629,43 @@ def processar_linha_t_primavera(cols):
 # ============================================================
 
 
-def _pre_processar_primavera(conteudo: str) -> str:
-    """Primavera: substitui código de secretaria incorreto 070374 → 070474."""
+def _pre_processar_prefeitura3(conteudo: str) -> str:
+    """prefeitura3: substitui código de secretaria incorreto 070374 → 070474."""
     return conteudo.replace(";070374;", ";070474;")
 
 
-PROCESSADORES_NOVA_LACERDA = {
-    "F": processar_linha_f_nova_lacerda,
-    "P": processar_linha_p_nova_lacerda,
-    "D": processar_linha_d_nova_lacerda,
+PROCESSADORES_prefeitura1 = {
+    "F": processar_linha_f_prefeitura1,
+    "P": processar_linha_p_prefeitura1,
+    "D": processar_linha_d_prefeitura1,
     "T": processar_linha_t,
     "M": processar_linha_m,
 }
 
-PROCESSADORES_TANGARA = {
-    "F": processar_linha_f_tangara,
-    "P": processar_linha_p_tangara,
-    "D": processar_linha_d_tangara,
-    "T": processar_linha_t_tangara,
+PROCESSADORES_prefeitura2 = {
+    "F": processar_linha_f_prefeitura2,
+    "P": processar_linha_p_prefeitura2,
+    "D": processar_linha_d_prefeitura2,
+    "T": processar_linha_t_prefeitura2,
     "M": processar_linha_m,
 }
 
-PROCESSADORES_PRIMAVERA = {
-    "F": processar_linha_f_primavera,
-    "P": processar_linha_p_primavera,
-    "D": processar_linha_d_primavera,
-    "T": processar_linha_t_primavera,
+PROCESSADORES_prefeitura3 = {
+    "F": processar_linha_f_prefeitura3,
+    "P": processar_linha_p_prefeitura3,
+    "D": processar_linha_d_prefeitura3,
+    "T": processar_linha_t_prefeitura3,
     "M": processar_linha_m,
 }
 
 _PRE_PROCESSADORES_MAP = {
-    "primavera": _pre_processar_primavera,
+    "prefeitura3": _pre_processar_prefeitura3,
 }
 
 _PROCESSADORES_MAP = {
-    "nova_lacerda": PROCESSADORES_NOVA_LACERDA,
-    "tangara": PROCESSADORES_TANGARA,
-    "primavera": PROCESSADORES_PRIMAVERA,
+    "prefeitura1": PROCESSADORES_prefeitura1,
+    "prefeitura2": PROCESSADORES_prefeitura2,
+    "prefeitura3": PROCESSADORES_prefeitura3,
 }
 
 
@@ -684,9 +684,9 @@ def processar(conteudo: str, sep: str = ";", prefeitura: str = None) -> dict:
 
     O parâmetro `prefeitura` seleciona regras específicas:
         None / 'geral'    → processamento padrão
-        'nova_lacerda'    → regras de Nova Lacerda
-        'tangara'         → regras de Tangará da Serra
-        'primavera'       → regras de Primavera do Leste
+        'prefeitura1'    → regras de Prefeitura 1
+        'prefeitura2'         → regras de Prefeitura 2
+        'prefeitura3'       → regras de prefeitura3 do Leste
     """
     # Normaliza acentos e ç → equivalentes ASCII (ex: ç→c, é→e, ã→a)
     conteudo = normalizar_texto(conteudo)

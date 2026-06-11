@@ -1,7 +1,0 @@
-Conferências do contracheque:
-Incluir na Linha F coluna W (dependentes) os números de dependentes, pois quando passa na macro fica zerado.
-Verificar se tem virgula em referente na linha P e D.
-Linha T zerar base de calculo FGTS coluna F e K.
-retirar os espaços em referencia da linha P e D.
-
-Na coluna de referência substituir . por nada e nas linhas em brancos inserir 0.00.
