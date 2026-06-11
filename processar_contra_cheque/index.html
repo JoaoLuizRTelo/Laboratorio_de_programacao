@@ -62,9 +62,10 @@
    LAYOUT
    ============================================================ */
     .app {
+      overflow: hidden;
       max-width: 860px;
       margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
+      padding: 1.5rem;
     }
 
     /* ============================================================
@@ -652,10 +653,10 @@
     }
 
     /* ============================================================
-   DASHBOARD — SELEÇÃO DE PREFEITURA
+  DASHBOARD — SELEÇÃO DE PREFEITURA
    ============================================================ */
     #screen-dashboard {
-      min-height: 100vh;
+      min-height: 90vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -920,6 +921,213 @@
     }
 
     /* ============================================================
+   MODAL DE AJUSTES
+   ============================================================ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 14, 30, 0.82);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      animation: fadeIn 0.18s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 200, 240, 0.08);
+      animation: modalIn 0.2s cubic-bezier(.22, .68, 0, 1.2);
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 1.1rem 1.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-bg2);
+      border: 1px solid rgba(0, 200, 240, 0.22);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .modal-header-icon svg {
+      width: 15px;
+      height: 15px;
+      stroke: var(--accent);
+    }
+
+    .modal-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .modal-subtitle {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--accent);
+      background: var(--accent-bg);
+      border: 1px solid rgba(0, 200, 240, 0.18);
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .modal-close svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .modal-body {
+      padding: 1.25rem 1.4rem;
+    }
+
+    .ajuste-item {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ajuste-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .ajuste-item:first-child {
+      padding-top: 0;
+    }
+
+    .ajuste-bullet {
+      width: 20px;
+      height: 20px;
+      background: var(--accent-bg);
+      border: 1px solid rgba(0, 200, 240, 0.18);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .ajuste-bullet svg {
+      width: 10px;
+      height: 10px;
+      stroke: var(--accent);
+    }
+
+    .ajuste-text {
+      font-size: 0.82rem;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    .ajuste-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .ajuste-text code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--accent);
+    }
+
+    /* Botão info no back-row */
+    .btn-info {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text3);
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-info svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+    }
+
+    .btn-info:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-bg);
+    }
+
+    .btn-info.hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* ============================================================
    RODAPÉ
    ============================================================ */
     footer {
@@ -950,7 +1158,8 @@
 
     @media (max-width: 600px) {
       .app {
-        padding: 1.5rem 1rem 4rem;
+        overflow: hidden;
+        padding: 1rem;
       }
 
       .header {
@@ -1080,6 +1289,13 @@
           Voltar
         </button>
         <span class="breadcrumb-name" id="breadcrumb-name"></span>
+        <button class="btn-info" id="btn-info" onclick="abrirAjustes()" title="Ver ajustes desta prefeitura">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        </button>
       </div>
 
       <!-- CABEÇALHO -->
@@ -1266,6 +1482,32 @@
 
     </div><!-- /screen-processor -->
 
+    <!-- ========================================================
+         MODAL DE AJUSTES POR PREFEITURA
+         ======================================================== -->
+    <div class="modal-overlay" id="modal-ajustes" onclick="fecharAjustes(event)">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
+        <div class="modal-header">
+          <div class="modal-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <span class="modal-title" id="modal-title-text">Ajustes</span>
+          <span class="modal-subtitle" id="modal-subtitle"></span>
+          <button class="modal-close" onclick="fecharAjustesBtn()" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+      </div>
+    </div>
+
     <script>
       'use strict';
 
@@ -1285,6 +1527,13 @@
         document.getElementById('breadcrumb-name').textContent = nome;
         document.getElementById('screen-dashboard').style.display = 'none';
         document.getElementById('screen-processor').style.display = 'block';
+        // Exibe o botão de info apenas para prefeituras com ajustes configurados
+        const btnInfo = document.getElementById('btn-info');
+        if (AJUSTES[id]) {
+          btnInfo.classList.remove('hidden');
+        } else {
+          btnInfo.classList.add('hidden');
+        }
         limpar();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -1559,6 +1808,105 @@
       function escHtml(str) {
         return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
+
+      /* ============================================================
+         MODAL DE AJUSTES
+         ============================================================ */
+      const AJUSTES = {
+        nova_lacerda: {
+          nome: 'Nova Lacerda',
+          itens: [
+            {
+              titulo: 'Datas sem barra',
+              texto: 'As datas de <strong>nascimento</strong> e <strong>admissão</strong> chegam no formato <code>DDMMAAAA</code>, sem separadores. O sistema converte automaticamente para <code>DD/MM/AAAA</code>.'
+            },
+            {
+              titulo: 'Referência com letras D ou H',
+              texto: 'Campos de referência nas linhas <code>P</code> e <code>D</code> que contenham as letras <code>D</code> ou <code>H</code> (ex: <code>30.00D</code>, <code>8.15H</code>) são substituídos por <code>0.00</code>. Os campos de valor devem conter apenas dígitos e pontos.'
+            },
+            {
+              titulo: 'Espaços de preenchimento nos nomes',
+              texto: 'O arquivo usa largura fixa nos campos de texto — nomes e descrições chegam com espaços à direita. O sistema remove esses espaços automaticamente em todos os campos da linha <code>F</code>.'
+            }
+          ]
+        },
+        tangara: {
+          nome: 'Tangará da Serra',
+          itens: [
+            {
+              titulo: 'Dependentes',
+              texto: 'O valor de <strong>dependentes</strong> (coluna W da linha <code>F</code>) é preservado do arquivo original — não é zerado como no processamento padrão.'
+            },
+            {
+              titulo: 'Referência nas linhas P e D',
+              texto: 'Espaços internos são removidos. Vírgulas são tratadas como separador decimal. Valores em branco ou somente <code>.</code> são substituídos por <code>0.00</code>. O resultado usa ponto como decimal (ex: <code>31.00</code>).'
+            },
+            {
+              titulo: 'Linha T — Base de cálculo FGTS',
+              texto: 'As colunas <strong>F</strong> (Total de Proventos) e <strong>K</strong> (Base FGTS) da linha <code>T</code> são zeradas conforme orientação.'
+            }
+          ]
+        },
+        primavera: {
+          nome: 'Primavera do Leste',
+          itens: [
+            {
+              titulo: 'Dependentes',
+              texto: 'O valor de <strong>dependentes</strong> (coluna W da linha <code>F</code>) é preservado do arquivo original — não é zerado como no processamento padrão.'
+            },
+            {
+              titulo: 'Referência com sufixo de letra',
+              texto: 'Nas linhas <code>P</code> e <code>D</code>, sufixos como <code>D</code> ou <code>H</code> no campo referência são removidos mantendo o valor numérico (ex: <code>30.00D</code> → <code>30.00</code>). Vírgulas são tratadas como decimal.'
+            },
+            {
+              titulo: 'Nome do vínculo com espaços',
+              texto: 'O campo <strong>Nome do Vínculo</strong> (coluna Q da linha <code>F</code>) é limpo de espaços extras nas extremidades.'
+            },
+            {
+              titulo: 'Linha T — Coluna J',
+              texto: 'A coluna <strong>J</strong> (Salário de Contribuição INSS) da linha <code>T</code> é zerada conforme orientação.'
+            },
+            {
+              titulo: 'Código de secretaria incorreto',
+              texto: 'O código <code>070374</code> que aparece no arquivo é substituído automaticamente por <code>070474</code> em todas as linhas.'
+            }
+          ]
+        },
+        geral: null
+      };
+
+      function abrirAjustes() {
+        const dados = AJUSTES[prefeituraAtual];
+        if (!dados) return;
+
+        document.getElementById('modal-subtitle').textContent = dados.nome;
+        document.getElementById('modal-title-text').textContent = 'Ajustes aplicados';
+
+        const bullet = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+        document.getElementById('modal-body').innerHTML = dados.itens.map(item => `
+          <div class="ajuste-item">
+            <div class="ajuste-bullet">${bullet}</div>
+            <div class="ajuste-text"><strong>${item.titulo}:</strong> ${item.texto}</div>
+          </div>
+        `).join('');
+
+        document.getElementById('modal-ajustes').classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function fecharAjustesBtn() {
+        document.getElementById('modal-ajustes').classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      function fecharAjustes(e) {
+        if (e.target === document.getElementById('modal-ajustes')) fecharAjustesBtn();
+      }
+
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') fecharAjustesBtn();
+      });
 
       /* ============================================================
          DRAG & DROP no body inteiro (UX extra)
